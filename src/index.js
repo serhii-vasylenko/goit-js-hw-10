@@ -1,9 +1,14 @@
 import './css/styles.css';
 
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import fetchCountries from './js/fetchCountries';
-import { createCountryInfoItemMarkup, createCountryListItemMarkup } from "./js/createMarkup";
 import debounce from 'lodash.debounce';
+import fetchCountries from './js/fetchCountries';
+import {
+  createCountryInfoItemMarkup,
+  createCountryListItemMarkup,
+} from './js/createMarkup';
+import getMarkupElements from './js/getMarkupElements';
+import clearCountriesEls from './js/clearCountriesEls';
 
 Notify.init({
   fontSize: '16px',
@@ -12,16 +17,15 @@ Notify.init({
 
 const DEBOUNCE_DELAY = 1000;
 
-const refs = {
-  searchBoxInput: document.querySelector('#search-box'),
-  countriesListContainer: document.querySelector('.country-list'),
-  singleCountryContainer: document.querySelector('.country-info'),
-};
+const refs = getMarkupElements();
 
-refs.searchBoxInput.addEventListener('input', debounce(onSearch, DEBOUNCE_DELAY));
+refs.searchBoxInput.addEventListener(
+  'input',
+  debounce(onSearch, DEBOUNCE_DELAY)
+);
 
-function onSearch(event) {
-  const query = event.target.value.trim();
+function onSearch({target}) {
+  const query = target.value.toLowerCase().trim();
 
   if (!query) {
     clearCountriesEls();
@@ -29,6 +33,9 @@ function onSearch(event) {
   }
 
   fetchCountries(query)
+    .then(result =>
+      result.filter(({ name: {common} }) => common.toLowerCase().includes(query))
+    )
     .then(countriesList => {
       switch (true) {
         case countriesList.length === 1:
@@ -40,7 +47,10 @@ function onSearch(event) {
 
         case countriesList.length > 1 && countriesList.length <= 10:
           refs.singleCountryContainer.innerHTML = '';
-          refs.countriesListContainer.innerHTML = countriesList
+          refs.countriesListContainer.innerHTML = [...countriesList]
+            .sort((countryA, countryB) =>
+              countryA.name.common.localeCompare(countryB.name.common)
+            )
             .map(country => createCountryListItemMarkup(country))
             .join('');
           break;
@@ -57,32 +67,4 @@ function onSearch(event) {
       clearCountriesEls();
       Notify.failure('Oops, there is no country with that name');
     });
-}
-
-// function createCountryInfoItemMarkup(country) {
-//   const { flags, name, capital, population, languages } = country;
-//   const markup = `
-//   <div class="country-info__tumb">
-//     <img class="country-info__flag" src="${flags.svg}" alt="${name.common}" width="50">
-//     <p class="country-info__name title">${name.common}</p>
-//   </div>
-//   <p>Capital: <span>${capital}</span></p>
-//   <p>Population: <span>${population}</span></p>
-//   <p>Languages: <span>${Object.values(languages).join(', ')}</span></p>
-//   `;
-//   return markup;
-// }
-
-// function createCountryListItemMarkup(country) {
-//   const { flags, name } = country;
-//   const markup = `<li class="country-list__item">
-//       <img class="country-list__flag" src="${flags.svg}" alt="${name.common}">
-//       <p class="country-list__name">${name.common}</p>
-//   </li>`;
-//   return markup;
-// }
-
-function clearCountriesEls() {
-  refs.countriesListContainer.innerHTML = '';
-  refs.singleCountryContainer.innerHTML = '';
 }

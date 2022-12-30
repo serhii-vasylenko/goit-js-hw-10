@@ -36,10 +36,6 @@ img {
   margin-bottom: 16px;
 }
 
-.country-info {
-  max-width: 300px;
-}
-
 .country-info__tumb {
   display: flex;
   align-items: center;
@@ -65,10 +61,6 @@ img {
 
 .country-info span {
   font-weight: normal;
-}
-
-.country-list {
-  /* width: 500px; */
 }
 
 .country-list__item {
