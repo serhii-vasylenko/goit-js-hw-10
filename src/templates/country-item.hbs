@@ -1,0 +1,23 @@
+<div class="country-info__tumb">
+      <img class="country-info__flag" src="{{flags.svg}}" alt="{{name.common}}" width="50">
+      <p class="country-info__name title">{{name.common}}</p>
+    </div>
+    <p>Capital: <span>
+        {{#each capital}}
+        <span>
+            {{#if @last}}{{this}}
+                {{else}}{{this}},
+            {{/if}}
+        </span>
+        {{/each}}
+    </span></p>
+    <p>Population: <span>{{population}}</span></p>
+    <p>Languages: 
+        {{#each languages}}
+        <span>
+            {{#if @last}}{{this}}
+                {{else}}{{this}},
+            {{/if}}
+        </span>
+        {{/each}}
+    </p>
